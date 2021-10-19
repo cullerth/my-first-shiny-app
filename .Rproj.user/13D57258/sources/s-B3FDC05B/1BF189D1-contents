@@ -1,0 +1,48 @@
+---
+title: "Gender & Final Grades"
+author: "Tori Culler"
+date: "9/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+
+data_to_viz <- read_csv("data/data-to-explore.csv")
+
+#sum(is.na(data_to_viz$gender))
+
+female <- data_to_viz %>%
+  group_by(subject) %>%
+  filter(gender == "F") %>%
+  summarise(final_grade = mean(proportion_earned * 100, na.rm = TRUE))
+
+male <- data_to_viz %>%
+  group_by(subject) %>%
+  filter(gender == "M") %>%
+  summarise(final_grade = mean(proportion_earned * 100, na.rm = TRUE)) 
+
+combined_final_grades <- merge(female, male, by = 'subject') %>%
+  rename(female_final_grades = 'final_grade.x', male_final_grades = 'final_grade.y')
+
+ggplot(combined_final_grades, aes(x = subject)) +
+  geom_point(aes(y = female_final_grades, color = 'Female')) +
+  geom_point(aes(y = male_final_grades, color = 'Male')) +
+  # geom_smooth(mapping = aes(x = mean_grade, y = mean_time_hrs), method = lm) +
+  labs(title = "Average Final Grades by Gender & Subject",
+       x = 'Final Grades',
+       y = "Subject",
+       color = "Gender",
+       caption = "Is there a gender difference in final grades across subjects?") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.caption = element_text(hjust = 0.5)) 
+
+```
+
+In the scatter plot above, each point indicates the average final grade by subject and gender for a set of online STEM courses. It appears that for 3 out of the 5 subjects represented (AnPhA, BioA, and FrScA), female students scored higher on average than male students. Male students had a slight edge on female students in two courses (OcnA and PhysA). It is worth noting that gender data was not available for a significant portion of students -- 227 of 943 (approximately 24%). Additionally, this only represents a binary conception of gender and doesn't account for other gender identities that students may hold. In any case, given that women, trans, and nonbinary people are still underrepresented in STEM fields, this information could be useful in designing online STEM courses to achieve greater gender parity to ensure long term student success and retention. 
