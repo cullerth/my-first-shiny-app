@@ -8,7 +8,7 @@ ui <- fluidPage(
   sidebarLayout(position = "left",
                 sidebarPanel(
                   #Checkbox for gender
-                  checkboxGroupInput("Gender",
+                  checkboxGroupInput("gender",
                                      "Which gender would you like to see data for?",
                                      choices = list("female",
                                                     "male"),
@@ -26,7 +26,7 @@ ui <- fluidPage(
   )
 )
 
-# Define server logic required to draw a histogram
+
 server <- function(input, output) {
   
   output$scatterplot <- renderPlot({
