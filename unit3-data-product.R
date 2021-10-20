@@ -4,27 +4,36 @@ library(tidyverse)
 data_to_viz <- read_csv("data/data-to-explore.csv")
 
 ui <- fluidPage(
-  titlePanel("Gender & Final Grades"),
+  titlePanel("Gender & Final Grades by Course"),
   sidebarLayout(position = "left",
                 sidebarPanel(
                   #Checkbox for gender
+                  checkboxGroupInput("subject", 
+                                     "Which course(s) would you like to see data for?", 
+                                     choices = list("Anatomy",
+                                                    "Biology", 
+                                                    "Forensics", 
+                                                    "Oceanography", 
+                                                    "Physics"),
+                                     selected = c("Anatomy", "Biology", "Forensics", "Oceanography", "Physics")), 
                   checkboxGroupInput("gender",
-                                     "Which gender would you like to see data for?",
-                                     choices = list("female",
-                                                    "male"),
-                                     selected = NULL)
-
+                                     "Which gender(s) would you like to see data for?",
+                                     choices = list("F",
+                                                    "M"),
+                                     selected = c("F", "M"))
+                  
                 ),
                 # Displays the scatterplot and help text
                 mainPanel(
                   
                   plotOutput("scatterplot"),
                   
-                  p("In the scatter plot above, each point indicates the average final grade by subject and gender for a set of online STEM courses. It appears that for 3 out of the 5 subjects represented (AnPhA, BioA, and FrScA), female students scored higher on average than male students. Male students had a slight edge on female students in two courses (OcnA and PhysA). It is worth noting that gender data was not available for a significant portion of students -- 227 of 943 (approximately 24%). Additionally, this only represents a binary conception of gender and doesn't account for other gender identities that students may hold. In any case, given that women, trans, and nonbinary people are still underrepresented in STEM fields, this information could be useful in designing online STEM courses to achieve greater gender parity to ensure long term student success and retention. ")
+                  p("The data avaialble here generates bar graphs representing the final grade by subject and gender for a set of online STEM courses. It appears that for 3 out of the 5 subjects represented (Anatomy Biology, and Forensics, female students scored higher on average than male students. Male students had a slight edge on female students in two courses (Oceonography and Physics). It is worth noting that gender data was not available for a significant portion of students -- 227 of 943 (approximately 24%). Additionally, this only represents a binary conception of gender and doesn't account for other gender identities that students may hold. In any case, given that women, trans, and nonbinary people are still underrepresented in STEM fields, this information could be useful in designing online STEM courses to achieve greater gender parity to ensure long term student success and retention. ")
                   
                 )
   )
 )
+
 
 
 server <- function(input, output) {
@@ -32,34 +41,31 @@ server <- function(input, output) {
   output$scatterplot <- renderPlot({
     
     #Creates a data frame for scatter plot using reactive inputs from ui
-    female <- data_to_viz %>%
-      group_by(subject) %>%
-      filter(gender == "F") %>%
-      summarise(final_grade = mean(proportion_earned * 100, na.rm = TRUE))
-    
-    male <- data_to_viz %>%
-      group_by(subject) %>%
-      filter(gender == "M") %>%
-      summarise(final_grade = mean(proportion_earned * 100, na.rm = TRUE)) 
-    
-    combined_final_grades <- merge(female, male, by = 'subject') %>%
-      rename(female = 'final_grade.x', male = 'final_grade.y')
+    final_grades <- data_to_viz %>%
+      group_by(subject, gender) %>%
+      mutate(subject = recode(subject, 
+                              "AnPhA" = "Anatomy",
+                              "BioA" = "Biology", 
+                              "FrScA" = "Forensics", 
+                              "OcnA" =  "Oceanography", 
+                              "PhysA" = "Physics")) %>%
+      summarise(final_grade = mean(proportion_earned * 100, na.rm = TRUE)) %>%
+      filter(gender %in% c(input$gender)) %>% 
+      filter(subject %in% c(input$subject))
     
     #Creates scatterplot for main panel in the ui    
-    ggplot(combined_final_grades, aes(x = subject)) +
-      geom_point(aes(y = input$female, color = 'Female')) +
-      geom_point(aes(y = input$male, color = 'Male')) +
+    ggplot(data = final_grades) +
+      geom_col(mapping = aes(x = subject, y = final_grade, fill = gender), position = "dodge") +
       labs(title = "Average Final Grades by Gender & Subject",
-           x = 'Final Grades',
-           y = "Subject",
+           x = 'Subject',
+           y = "Final Grade",
            color = "Gender",
            caption = "Is there a gender difference in final grades across subjects?") +
       theme(plot.title = element_text(hjust = 0.5)) +
-      theme(plot.caption = element_text(hjust = 0.5)) 
+      theme(plot.caption = element_text(hjust = 0.5))
   })
   
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-

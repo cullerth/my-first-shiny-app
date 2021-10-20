@@ -3,7 +3,7 @@
     "path": "~/Desktop/GCLA/ECI-586/unit-3/my-first-shiny-app/unit3-data-product.R",
     "project_path": "unit3-data-product.R",
     "type": "r_source",
-    "hash": "3180565180",
+    "hash": "0",
     "contents": "",
     "dirty": false,
     "created": 1634664209459.0,
@@ -11,15 +11,15 @@
     "relative_order": 2,
     "properties": {
         "tempName": "Untitled1",
-        "cursorPosition": "28,0",
-        "scrollLine": "23"
+        "cursorPosition": "58,60",
+        "scrollLine": "51"
     },
     "folds": "",
-    "lastKnownWriteTime": 1634670623,
+    "lastKnownWriteTime": 1634764375,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1634670623704,
+    "last_content_update": 1634764375854,
     "read_only": false,
     "read_only_alternatives": []
 }
